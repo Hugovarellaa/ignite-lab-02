@@ -1,5 +1,5 @@
 import { ArrowLeft } from "phosphor-react";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { FeedbackType, feddbackTypes } from "..";
 import { CloseButton } from "../../CloseButton";
 import { ScreenshotButton } from "../ScreenshotButton";
@@ -7,13 +7,22 @@ import { ScreenshotButton } from "../ScreenshotButton";
 interface Props {
   feedbackType: FeedbackType;
   onFeedbackRestartRequested: () => void;
+  onFeedbackSent: () => void;
 }
 
 export function FeedbackContentStep({
   feedbackType,
   onFeedbackRestartRequested,
+  onFeedbackSent
 }: Props) {
   const [screenshot, setScreenshot] = useState<string | null>(null);
+  const [comment, setComment] = useState("");
+
+  function handleSubmitFeedback(event: FormEvent) {
+    event.preventDefault();
+    console.log({ screenshot, comment });
+    onFeedbackSent()
+  }
 
   const feedbackTypeInfo = feddbackTypes[feedbackType];
   return (
@@ -38,7 +47,7 @@ export function FeedbackContentStep({
         <CloseButton />
       </header>
 
-      <form className="my-4 w-full">
+      <form className="my-4 w-full" onSubmit={handleSubmitFeedback}>
         <textarea
           className="min-w-[304px] 
           w-full min-h-[112px] 
@@ -58,13 +67,18 @@ export function FeedbackContentStep({
           scrollbar-track-transparent
           "
           placeholder="Conte com detalhes o que está acontencendo..."
+          onChange={(event) => setComment(event.target.value)}
         />
 
         <footer className="flex gap-2 mt-2">
-          <ScreenshotButton onScreenshotTook={setScreenshot} screenshot={screenshot}/>
+          <ScreenshotButton
+            onScreenshotTook={setScreenshot}
+            screenshot={screenshot}
+          />
 
           <button
             type="submit"
+            disabled={comment.length === 0}
             className="p-2 
             bg-brand-500 
             rounded-md 
@@ -80,6 +94,8 @@ export function FeedbackContentStep({
             focus:ring-offset-zinc-900
             focus:ring-brand-500
             transition-colors
+            disabled:opacity-50
+            disabled:hover:bg-brand-500
             "
           >
             Enviar feedback
